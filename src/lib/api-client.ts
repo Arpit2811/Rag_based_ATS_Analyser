@@ -1,10 +1,11 @@
 import type { ChatMessage } from "./types";
 
 const API_URL_KEY = "ats-api-url";
+export const DEFAULT_API_URL = "http://localhost:8000";
 
 export function getApiUrl(): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(API_URL_KEY) ?? "";
+  if (typeof window === "undefined") return DEFAULT_API_URL;
+  return localStorage.getItem(API_URL_KEY) ?? DEFAULT_API_URL;
 }
 
 export function setApiUrl(url: string) {
@@ -15,6 +16,19 @@ function ensureUrl(): string {
   const url = getApiUrl();
   if (!url) throw new Error("API URL is not configured. Go to Settings and set your backend URL.");
   return url;
+}
+
+export async function pingBackend(url?: string): Promise<{ ok: boolean; message: string }> {
+  const base = (url ?? getApiUrl()).replace(/\/$/, "");
+  if (!base) return { ok: false, message: "No URL configured" };
+  try {
+    const res = await fetch(`${base}/health`, { method: "GET" });
+    if (!res.ok) return { ok: false, message: `HTTP ${res.status}` };
+    const json = (await res.json().catch(() => ({}))) as { ok?: boolean };
+    return { ok: json.ok === true, message: json.ok ? "Connected" : "Bad response" };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : "Unreachable" };
+  }
 }
 
 export async function ingestSession(sid: string, resume: File, jd: File) {
