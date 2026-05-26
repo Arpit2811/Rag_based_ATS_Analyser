@@ -30,3 +30,28 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Env
+venv/
+rag_venv/
+
+# Chroma DB
+chroma_db/
+
+# Sessions
+sessions/
+
+# Uploaded Docs
+data/resumes/
+data/jds/
+
+# OS
+.DS_Store
+Thumbs.db
